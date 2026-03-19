@@ -1,8 +1,8 @@
 # Claude Project Context
 
 **Project**: Financial Health Prediction - Zindi Competition
-**Last Updated**: 2026-03-12
-**Status**: Hyperparameter Tuning Phase
+**Last Updated**: 2026-03-14
+**Status**: Optuna Hyperparameter Tuning Ready
 
 ---
 
@@ -44,6 +44,12 @@ financial_health_prediction/
 │   ├── Hyperparameter tuning (in progress)
 │   └── Submission generation
 │
+├── fh-gpu.ipynb                       # GPU-optimized notebook (created 2026-03-14)
+│   ├── All content from main notebook up to hyperparameter tuning
+│   ├── XGBoost configured for GPU (device='cuda', predictor='gpu_predictor')
+│   ├── Optuna code excluded for focused GPU training
+│   └── 60 cells ready for GPU execution
+│
 ├── Data files/
 │   ├── Train.csv                      # Original training data (9,618 rows × 38 cols)
 │   ├── Test.csv                       # Original test data (2,405 rows × 37 cols)
@@ -79,7 +85,9 @@ fastai>=2.7.0           # High-level DL library, used for tabular preprocessing
 torch>=2.0.0            # PyTorch (fastai dependency)
 
 # Hyperparameter Optimization
-scikit-optimize>=0.9.0  # Bayesian optimization (BayesSearchCV)
+scikit-optimize>=0.9.0    # Bayesian optimization (BayesSearchCV)
+optuna>=4.7.0             # Modern hyperparameter optimization framework
+optuna-integration>=4.7.0 # Optional: XGBoost integration for pruning
 
 # Utilities
 tqdm                    # Progress bars
@@ -349,22 +357,46 @@ assert len(sample_weights) == len(y_train), "Sample weights mismatch!"
 4. **Baseline Models**:
    - FastAI neural network: F1 ≈ 0.75 (underfitted)
    - XGBoost (default params): F1 = 0.8002
-5. **Documentation**:
-   - Complete hyperparameter tuning notes created
+5. **Cross-Validation Implementation** ✨ NEW (2026-03-14)
+   - Cell 46: `xgb_default_params` with 5-Fold Stratified CV
+   - Cell 47: `xgb_better_params` with 5-Fold Stratified CV
+   - Proper handling of class imbalance (65%/30%/5%)
+   - Reliable F1 Macro scores with ±std
+6. **GPU Acceleration Setup** ✨ NEW (2026-03-14)
+   - Cell 6: GPU availability check cell
+   - Auto-detection of CUDA support
+   - Sets `DEVICE` variable (cuda/cpu)
+   - 10-50x speedup potential
+7. **Optuna Hyperparameter Tuning** ✨ NEW (2026-03-14)
+   - Cell 50: Objective function (11 hyperparameters)
+   - Cell 51: Optimization runner (100 trials, 2-hour timeout)
+   - Cell 52: Visualizations (4 interactive plots)
+   - Cell 53: Best model training and evaluation
+   - Simplified implementation (no pruning integration for reliability)
+8. **Documentation**:
+   - Complete hyperparameter tuning notes updated
    - All XGBoost parameters explained
-   - Search methods compared
+   - Search methods compared (Grid/Random/Bayesian/Optuna)
+   - GPU acceleration guide added
+   - Optuna implementation guide added
 
-### 🔄 In Progress
-1. **Hyperparameter Tuning**: Ready to implement
-   - Grid Search (3-stage) prepared
-   - Bayesian Optimization prepared
-   - Class weights calculated
+### 🔄 Ready to Execute
+1. **Optuna Hyperparameter Tuning**: Fully implemented, ready to run
+   - **Cell 50**: Define objective function ✅
+   - **Cell 51**: Run 100 trials (~20-40 min with GPU, ~4-6 hours CPU) ⏳
+   - **Cell 52**: Generate visualizations ✅
+   - **Cell 53**: Train final model ✅
+
+2. **Expected Improvement**:
+   - Current baseline: F1 = 0.8002
+   - Target with tuning: F1 = 0.82-0.85 (+2-5%)
 
 ### 📋 To Do
-1. **Run Hyperparameter Tuning**:
-   - [ ] Execute Bayesian Optimization (50 iterations, ~1-2 hours)
-   - [ ] OR Execute Grid Search (3 stages, ~50-65 minutes)
-   - [ ] Validate on held-out set
+1. **Execute Optimization**:
+   - [ ] Run Cell 6 (GPU check)
+   - [ ] Run Cell 51 (Optuna optimization) - ~20-40 min with GPU
+   - [ ] Analyze Cell 52 (visualizations) to understand parameter importance
+   - [ ] Run Cell 53 (train best model) and compare with baseline
    - [ ] Generate optimized submission
 
 2. **If Time Permits**:
@@ -582,6 +614,6 @@ submission.to_csv('submission_tuned.csv', index=False)
 
 ---
 
-**Last Session**: Comprehensive hyperparameter tuning theory and implementation prepared. Ready to execute tuning!
+**Last Session (2026-03-14)**: Implemented Optuna hyperparameter tuning with GPU support and cross-validation. Added 4 new cells (50-53) for complete optimization workflow. Updated documentation with Optuna and GPU guides.
 
-**Next Step**: Run Bayesian Optimization or Grid Search to improve baseline F1 score.
+**Next Step**: Run Cell 6 to check GPU, then execute Cell 51 to optimize hyperparameters (100 trials).
